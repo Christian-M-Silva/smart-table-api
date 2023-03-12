@@ -40,5 +40,8 @@ export default class RegisterValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'entity.unique': 'A entidade que você está tentando cadastrar já está em uso, tente outra',
+    'email.unique': 'O email que você está tentando cadastrar já está em uso, tente outro'
+  }
 }
