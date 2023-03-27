@@ -15,6 +15,7 @@
 import Env from '@ioc:Adonis/Core/Env'
 
 export default Env.rules({
+	URL_RECOVER: Env.schema.string(),
 	SMTP_HOST: Env.schema.string({ format: 'host' }),
 	SMTP_PORT: Env.schema.number(),
 	SMTP_USERNAME: Env.schema.string(),
