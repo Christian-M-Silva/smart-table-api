@@ -14,14 +14,15 @@ export default class AuthController {
 
   public async destroy({ auth }: HttpContextContract) {
     const user = await auth.authenticate()
-    
+
     await Mail.sendLater((message) => {
       message
         .from('christianmoraissilvacms@gmail.com')
         .to(user.email)
         .subject('Recuperação de e-mail')
-        .text('This is a test email')
-      // .htmlView('emails/welcome', { name: 'Virk' })
+        .htmlView('emails/recover', {
+          user,
+        })
     })
     // await auth.use('api').logout()
   }
