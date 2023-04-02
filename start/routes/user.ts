@@ -1,6 +1,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(()=> {
-    Route.put('/sendEmailForgetPassword', 'UsersController.sendEmailForgetPassword' )
+    Route.post('/sendEmailForgetPassword', 'UsersController.sendEmailForgetPassword' )
+    Route.put('/changePassword/:tableId', 'UsersController.changePassword' )
 }).prefix('/user')
 Route.resource('/user', 'UsersController').apiOnly().except(['index'])

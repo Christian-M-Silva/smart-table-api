@@ -21,6 +21,14 @@ export default class UsersController {
 
   public async destroy({ }: HttpContextContract) { }
 
+  public async changePassword({ request, params, response }: HttpContextContract) {
+    const { password } = request.all()
+    const user = await User.findByOrFail('tableId', params.tableId)
+    user.password = password
+    await user.save()
+    return response.ok({})
+  }
+
   public async sendEmailForgetPassword({ request, response }: HttpContextContract) {
     const { email } = request.all()
 
@@ -37,7 +45,7 @@ export default class UsersController {
         .subject('Recuperação de e-mail')
         .htmlView('emails/recover', {
           user,
-          url: `${Env.get('URL_RECOVER')}/${user.tableId}`
+          url: `${Env.get('URL_RECOVER')}loginAndRegister/${user.tableId}`
         })
     })
 
