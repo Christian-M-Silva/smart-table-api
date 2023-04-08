@@ -40,7 +40,7 @@ export default class UsersController {
 
     await Mail.sendLater((message) => {
       message
-        .from('tininjacms@gmail.com')
+        .from(Env.get('SMTP_USERNAME'))
         .to(email)
         .subject('Recuperação de e-mail')
         .htmlView('emails/recover', {

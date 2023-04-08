@@ -20,7 +20,7 @@ export default Env.rules({
 	SMTP_PORT: Env.schema.number(),
 	SMTP_USERNAME: Env.schema.string(),
 	SMTP_PASSWORD: Env.schema.string(),
-	SMTP_SECURE: Env.schema.boolean(),
+	SMTP_SECURE: Env.schema.string(),
 	HOST: Env.schema.string({ format: 'host' }),
 	MYSQL_HOST: Env.schema.string({ format: 'host' }),
 	MYSQL_PORT: Env.schema.number(),
