@@ -8,7 +8,8 @@ export default class AuthController {
       expiresIn: '30 days',
     })
 
-    return token
+    const tableId = token.user.tableId
+    return {token, tableId}
   }
 
   public async destroy({ auth }: HttpContextContract) {
