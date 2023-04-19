@@ -15,4 +15,10 @@ export default class TablesController {
   public async update({ }: HttpContextContract) { }
 
   public async destroy({ }: HttpContextContract) { }
+
+  public async search({ params }: HttpContextContract) {
+    const { tableId, search } = params
+    console.log("🚀 ~ file: TablesController.ts:21 ~ TablesController ~ search ~ search:", search)
+    console.log("🚀 ~ file: TablesController.ts:21 ~ TablesController ~ search ~ tableId:", tableId)
+  }
 }
