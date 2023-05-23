@@ -8,7 +8,11 @@ export default class TablesController {
     return tables
   }
 
-  public async store({ }: HttpContextContract) { }
+  public async store({ request, response }: HttpContextContract) { 
+    const dataTable = request.all()
+    await Table.create(dataTable)
+    return response.created()
+  }
 
   public async show({ }: HttpContextContract) { }
 

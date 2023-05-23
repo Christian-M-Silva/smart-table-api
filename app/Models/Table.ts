@@ -6,13 +6,16 @@ export default class Table extends BaseModel {
   public id: number
 
   @column()
+  public idTable: string
+
+  @column()
   public rows: Array<object>
 
   @column()
-  public columns: Array<object>
+  public cols: Array<object>
 
   @column()
-  public daysWeek: Array<string>
+  public daysWeek: Array<object>
 
   @column()
   public nameTable: string
