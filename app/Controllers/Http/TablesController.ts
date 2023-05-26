@@ -8,7 +8,7 @@ export default class TablesController {
     return tables
   }
 
-  public async store({ request, response }: HttpContextContract) { 
+  public async store({ request, response }: HttpContextContract) {
     const dataTable = request.all()
     await Table.create(dataTable)
     return response.created()
@@ -23,7 +23,7 @@ export default class TablesController {
     console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ id:", id)
     console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ tableId:", tableId)
   }
- 
+
   public async search({ params }: HttpContextContract) {
     const { tableId, search } = params
     console.log("🚀 ~ file: TablesController.ts:21 ~ TablesController ~ search ~ search:", search)
@@ -34,5 +34,17 @@ export default class TablesController {
     const { tableId, id } = params
     console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ id:", id)
     console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ tableId:", tableId)
+  }
+
+  public async existTableWithThisName({ params }: HttpContextContract) {
+    const { tableName, tableId } = params
+    
+    const existTable = await Table.query().where('idTable', tableId).where('nameTable', tableName)
+
+   if (existTable.length > 0) {
+    return true
+   }
+
+   return false
   }
 }
