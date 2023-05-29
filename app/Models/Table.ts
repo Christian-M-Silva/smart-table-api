@@ -1,7 +1,10 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import CamelCaseNamingStrategy from './CamelCaseNamingStrategy'
 
 export default class Table extends BaseModel {
+  public static namingStrategy = new CamelCaseNamingStrategy()
+
   @column({ isPrimary: true })
   public id: number
 
@@ -20,10 +23,18 @@ export default class Table extends BaseModel {
   @column()
   public nameTable: string
 
-  @column.dateTime()
+  @column.dateTime({
+    serialize: (value: DateTime) => {
+      return value.toFormat('dd/MM/yyyy')
+    }
+  })
   public nextUpdate: DateTime
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({
+    autoCreate: true, serialize: (value: DateTime) => {
+      return value.toFormat('dd/MM/yyyy')
+    }
+  })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })

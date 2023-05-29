@@ -4,7 +4,7 @@ import Table from 'App/Models/Table'
 export default class TablesController {
   public async index({ params }: HttpContextContract) {
     const { tableId } = params
-    const tables = await Table.query().where('tableId', tableId)
+    const tables = await Table.query().where('idTable', tableId)
     return tables
   }
 
