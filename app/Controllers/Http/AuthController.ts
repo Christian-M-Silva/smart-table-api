@@ -9,7 +9,7 @@ export default class AuthController {
     })
 
     const tableId = dataToken.user.tableId
-    return {dataToken, tableId}
+    return { dataToken, tableId }
   }
 
   public async destroy({ auth }: HttpContextContract) {
@@ -18,8 +18,16 @@ export default class AuthController {
   }
 
   public async isAuthenticate({ auth }: HttpContextContract) {
+    let entity = ''
     const isAuthenticate = await auth.check()
+    if (isAuthenticate) {
+      const user = await auth.authenticate()
+       entity = user.entity
+    }
 
-    return isAuthenticate
+    return {
+      entity,
+      isAuthenticate
+    }
   }
 }
