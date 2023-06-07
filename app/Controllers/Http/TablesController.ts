@@ -65,8 +65,8 @@ export default class TablesController {
 
   public async destroy({ params }: HttpContextContract) {
     const { tableId, id } = params
-    console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ id:", id)
-    console.log("🚀 ~ file: TablesController.ts:19 ~ TablesController ~ destroy ~ tableId:", tableId)
+    const table = await Table.query().where('idTable', tableId).where('id', id).first()
+    table?.delete()
   }
 
   public async search({ params }: HttpContextContract) {
