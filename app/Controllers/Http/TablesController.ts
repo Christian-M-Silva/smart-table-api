@@ -81,8 +81,8 @@ export default class TablesController {
     return table
   }
 
-  public async existTableWithThisName({ params }: HttpContextContract) {
-    const { tableName, tableId } = params
+  public async existTableWithThisName({ request }: HttpContextContract) {
+    const { tableName, tableId } = request.all()
 
     const existTable = await Table.query().where('idTable', tableId).where('nameTable', tableName)
 
