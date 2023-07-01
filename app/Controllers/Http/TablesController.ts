@@ -93,7 +93,6 @@ export default class TablesController {
   }
 
   public async saveCredentials(client: OAuth2Client) {
-    // client.
     const content = await fs.readFile(CREDENTIALS_PATH);
     const keys = JSON.parse(content);
     const key = keys.installed || keys.web;
