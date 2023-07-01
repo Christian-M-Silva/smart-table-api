@@ -1,15 +1,17 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Table from 'App/Models/Table'
+import { OAuth2Client } from 'google-auth-library';
 import Database from '@ioc:Adonis/Lucid/Database'
 import { camelCase } from 'lodash'
-import { format } from 'date-fns';
+import { TypeGetTable } from 'interfaces/interfaces'
+import { parseISO, format } from 'date-fns';
 import Env from '@ioc:Adonis/Core/Env'
 const fs = require('fs').promises;
 const path = require('path');
 const process = require('process');
 const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
-const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'];
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), Env.get('CREDENTIALS_JSON'));
 export default class TablesController {
@@ -36,7 +38,7 @@ export default class TablesController {
     const totalRows = countResult[0][0].total;
 
 
-    const data = result[0].map((row) => {
+    const data = result[0].map((row: TypeGetTable) => {
       const convertedRow = {}
       for (const key in row) {
         switch (key) {
@@ -52,10 +54,6 @@ export default class TablesController {
       return convertedRow
     })
 
-    this.authorize()
-      .then(res => console.log(res))
-      .catch(e => console.error(e));
-
     response.ok({
       data,
       meta: {
@@ -66,8 +64,20 @@ export default class TablesController {
     })
   }
 
+  public async authorizeApi() {
+    try {
+      const result = await this.authorize();
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   public async store({ request, response }: HttpContextContract) {
     const dataTable = request.all()
+    const eventId = await this.createEvent(dataTable)
+    dataTable.eventId = eventId
     await Table.create(dataTable)
     return response.created()
   }
@@ -82,7 +92,8 @@ export default class TablesController {
     }
   }
 
-  public async saveCredentials(client) {
+  public async saveCredentials(client: OAuth2Client) {
+    // client.
     const content = await fs.readFile(CREDENTIALS_PATH);
     const keys = JSON.parse(content);
     const key = keys.installed || keys.web;
@@ -110,6 +121,40 @@ export default class TablesController {
     return client;
   }
 
+  public createEvent(dataTable: { [key: string]: string }): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
+        const auth = await this.authorizeApi();
+        const event = {
+          summary: `Atualizar a tabela ${dataTable.nameTable}`,
+          description: `Abra o sistema e ele atualizará sua(s) tabela(s) automaticamente`,
+          start: {
+            date,
+          },
+          end: {
+            date,
+          },
+        };
+        const calendar = await google.calendar({ version: 'v3', auth });
+        const dataEvent = {
+          auth,
+          calendarId: 'primary',
+          resource: event,
+        };
+        await calendar.events.insert(dataEvent, (err: any, event: any) => {
+          if (err) {
+            console.log('There was an error contacting the Calendar service: ' + err);
+            reject(err);
+          }
+          resolve(event.data.id);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
   // public async listEvents(auth) {
   //   const calendar = google.calendar({ version: 'v3', auth });
   //   const res = await calendar.events.list({

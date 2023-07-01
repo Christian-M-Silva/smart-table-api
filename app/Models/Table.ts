@@ -12,6 +12,9 @@ export default class Table extends BaseModel {
   public idTable: string
 
   @column()
+  public eventId: string
+
+  @column()
   public rows: Array<object>
 
   @column()

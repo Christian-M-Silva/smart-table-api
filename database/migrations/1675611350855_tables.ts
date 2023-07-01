@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('name_table').notNullable()
+      table.string('event_id').notNullable()
       table.json('rows').notNullable()
       table.json('cols').notNullable()
       table.json('days_week').notNullable()
