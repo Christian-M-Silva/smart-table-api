@@ -153,34 +153,30 @@ export default class TablesController {
       }
     });
   }
-  
-  // public async listEvents(auth) {
-  //   const calendar = google.calendar({ version: 'v3', auth });
-  //   const res = await calendar.events.list({
-  //     calendarId: 'primary',
-  //     timeMin: new Date().toISOString(),
-  //     maxResults: 10,
-  //     singleEvents: true,
-  //     orderBy: 'startTime',
-  //   });
-  //   const events = res.data.items;
-  //   if (!events || events.length === 0) {
-  //     console.log('No upcoming events found.');
-  //     return;
-  //   }
-  //   console.log('Upcoming 10 events:');
-  //   events.map((event, i) => {
-  //     const start = event.start.dateTime || event.start.date;
-  //     console.log(`${start} - ${event.summary}`);
-  //   });
-  // }
+
+  public async deleteEvent(eventId: string): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const auth = await this.authorizeApi();
+        const calendar = await google.calendar({ version: 'v3', auth });
+        await calendar.events.delete({
+          calendarId: 'primary',
+          eventId,
+        })
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    });
+  }
 
   public async show({ }: HttpContextContract) { }
 
   public async update({ }: HttpContextContract) { }
 
   public async destroy({ params }: HttpContextContract) {
-    const { tableId, id } = params
+    const { tableId, id, eventId } = params
+    await this.deleteEvent(eventId)
     const table = await Table.query().where('idTable', tableId).where('id', id).first()
     table?.delete()
   }
