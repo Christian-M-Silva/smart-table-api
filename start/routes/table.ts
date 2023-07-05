@@ -4,6 +4,7 @@ Route.group(()=> {
     Route.get('/:tableId', 'TablesController.index' )
     Route.get('/search/:tableId/:search', 'TablesController.search' )
     Route.get('/download/:tableId/:id', 'TablesController.download' )
+    Route.put('/updateDates/:id', 'TablesController.updateDates' )
     Route.post('/existTableWithThisName', 'TablesController.existTableWithThisName' )
     Route.delete('/:tableId/:id/:eventId', 'TablesController.destroy' )
 }).prefix('/table')

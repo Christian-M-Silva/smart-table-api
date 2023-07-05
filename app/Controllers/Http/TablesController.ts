@@ -16,52 +16,56 @@ const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), Env.get('CREDENTIALS_JSON'));
 export default class TablesController {
   public async index({ params, request, response }: HttpContextContract) {
-    const { tableId } = params
-    const { page, perPage, search } = request.all()
+    try {
+      const { tableId } = params
+      const { page, perPage, search } = request.all()
 
-    const offset = (parseInt(page) - 1) * perPage
+      const offset = (parseInt(page) - 1) * perPage
 
-    const query = `SELECT * FROM tables WHERE id_table = :idTable AND LOWER(REGEXP_REPLACE(name_table, '[^a-zA-Z0-9]+', '')) LIKE LOWER(CONCAT('%', REGEXP_REPLACE(:search, '[^a-zA-Z0-9]+', ''), '%')) LIMIT :perPage OFFSET :offset`
-    const result = await Database.rawQuery(query, {
-      idTable: tableId,
-      search: search,
-      perPage: parseInt(perPage),
-      offset: offset
-    })
+      const query = `SELECT * FROM tables WHERE id_table = :idTable AND LOWER(REGEXP_REPLACE(name_table, '[^a-zA-Z0-9]+', '')) LIKE LOWER(CONCAT('%', REGEXP_REPLACE(:search, '[^a-zA-Z0-9]+', ''), '%')) LIMIT :perPage OFFSET :offset`
+      const result = await Database.rawQuery(query, {
+        idTable: tableId,
+        search: search,
+        perPage: parseInt(perPage),
+        offset: offset
+      })
 
-    const countQuery = `SELECT COUNT(*) AS total FROM tables WHERE id_table = :idTable AND LOWER(REGEXP_REPLACE(name_table, '[^a-zA-Z0-9]+', '')) LIKE LOWER(CONCAT('%', REGEXP_REPLACE(:search, '[^a-zA-Z0-9]+', ''), '%'))`
-    const countResult = await Database.rawQuery(countQuery, {
-      idTable: tableId,
-      search: search
-    });
+      const countQuery = `SELECT COUNT(*) AS total FROM tables WHERE id_table = :idTable AND LOWER(REGEXP_REPLACE(name_table, '[^a-zA-Z0-9]+', '')) LIKE LOWER(CONCAT('%', REGEXP_REPLACE(:search, '[^a-zA-Z0-9]+', ''), '%'))`
+      const countResult = await Database.rawQuery(countQuery, {
+        idTable: tableId,
+        search: search
+      });
 
-    const totalRows = countResult[0][0].total;
+      const totalRows = countResult[0][0].total;
 
 
-    const data = result[0].map((row: TypeGetTable) => {
-      const convertedRow = {}
-      for (const key in row) {
-        switch (key) {
-          case 'next_update':
-          case 'created_at':
-            const date = new Date(row[key]);
-            const dateFormatted = format(date, 'dd/MM/yyyy');
-            row[key] = dateFormatted
-            break;
+      const data = result[0].map((row: TypeGetTable) => {
+        const convertedRow = {}
+        for (const key in row) {
+          switch (key) {
+            case 'next_update':
+            case 'created_at':
+              const date = new Date(row[key]);
+              const dateFormatted = format(date, 'dd/MM/yyyy');
+              row[key] = dateFormatted
+              break;
+          }
+          convertedRow[camelCase(key)] = row[key]
         }
-        convertedRow[camelCase(key)] = row[key]
-      }
-      return convertedRow
-    })
+        return convertedRow
+      })
 
-    response.ok({
-      data,
-      meta: {
-        page: page,
-        perPage: perPage,
-        total: totalRows
-      }
-    })
+      response.ok({
+        data,
+        meta: {
+          page: page,
+          perPage: perPage,
+          total: totalRows
+        }
+      })
+    } catch (error) {
+      throw error;
+    }
   }
 
   public async authorizeApi() {
@@ -79,7 +83,18 @@ export default class TablesController {
     const eventId = await this.createEvent(dataTable)
     dataTable.eventId = eventId
     await Table.create(dataTable)
-    return response.created()
+    response.created()
+  }
+  public async updateDates({ request, response, params }: HttpContextContract) {
+    try {
+      const dataTable = request.all()
+      const table = await Table.findOrFail(params.id)
+      table.merge(dataTable)
+      table.save()
+      response.created()
+    } catch (error) {
+      throw error
+    }
   }
 
   public async loadSavedCredentialsIfExist() {
