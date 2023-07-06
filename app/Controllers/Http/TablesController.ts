@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Table from 'App/Models/Table'
+import User from 'App/Models/User';
 import { OAuth2Client } from 'google-auth-library';
 import Database from '@ioc:Adonis/Lucid/Database'
 import { camelCase } from 'lodash'
@@ -90,7 +91,9 @@ export default class TablesController {
       const dataTable = request.all()
       const table = await Table.findOrFail(params.id)
       table.merge(dataTable)
-      table.save()
+      const tableUpdate = await table.save()
+      const user = await User.findByOrFail('tableId', tableUpdate.idTable)
+      this.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable)
       response.created()
     } catch (error) {
       throw error
@@ -169,6 +172,35 @@ export default class TablesController {
     });
   }
 
+  public updateEvent(dataTable: { [key: string]: string }, email: string, eventId: string, nameTable:string): Promise<any> {
+    return new Promise(async (_resolve, reject) => {
+      try {
+        const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
+        const auth = await this.authorizeApi();
+        const event = {
+          summary: `Atualizar a tabela ${nameTable}`,
+          description: `Abra o sistema e ele atualizará sua(s) tabela(s) automaticamente`,
+          start: {
+            date,
+          },
+          end: {
+            date,
+          },
+        };
+        const calendar = await google.calendar({ version: 'v3', auth });
+        const dataEvent = {
+          auth,
+          calendarId: email,
+          eventId,
+          resource: event,
+        };
+        await calendar.events.update(dataEvent)
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
   public async deleteEvent(eventId: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -194,12 +226,6 @@ export default class TablesController {
     await this.deleteEvent(eventId)
     const table = await Table.query().where('idTable', tableId).where('id', id).first()
     table?.delete()
-  }
-
-  public async search({ params }: HttpContextContract) {
-    const { tableId, search } = params
-    console.log("🚀 ~ file: TablesController.ts:21 ~ TablesController ~ search ~ search:", search)
-    console.log("🚀 ~ file: TablesController.ts:21 ~ TablesController ~ search ~ tableId:", tableId)
   }
 
   public async download({ params }: HttpContextContract) {
