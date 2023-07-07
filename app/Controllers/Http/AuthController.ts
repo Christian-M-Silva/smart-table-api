@@ -13,7 +13,6 @@ export default class AuthController {
   }
 
   public async destroy({ auth }: HttpContextContract) {
-
     await auth.use('api').logout()
   }
 
@@ -22,7 +21,7 @@ export default class AuthController {
     const isAuthenticate = await auth.check()
     if (isAuthenticate) {
       const user = await auth.authenticate()
-       entity = user.entity
+      entity = user.entity
     }
 
     return {
