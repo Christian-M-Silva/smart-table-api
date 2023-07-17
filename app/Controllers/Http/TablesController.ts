@@ -94,7 +94,7 @@ export default class TablesController {
       const tableUpdate = await table.save()
       const user = await User.findByOrFail('tableId', tableUpdate.idTable)
       this.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable)
-      response.created()
+      response.created(tableUpdate.nameTable)
     } catch (error) {
       throw error
     }
