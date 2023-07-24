@@ -74,7 +74,6 @@ export default class TablesController {
       const result = await this.authorize();
       return result;
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -161,7 +160,6 @@ export default class TablesController {
         };
         await calendar.events.insert(dataEvent, (err: any, event: any) => {
           if (err) {
-            console.log('There was an error contacting the Calendar service: ' + err);
             reject(err);
           }
           resolve(event.data.id);
