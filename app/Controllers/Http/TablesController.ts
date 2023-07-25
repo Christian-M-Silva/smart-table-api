@@ -12,7 +12,7 @@ const path = require('path');
 const process = require('process');
 const { authenticate } = require('@google-cloud/local-auth');
 const { google } = require('googleapis');
-const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'];
+const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.events.readonly'];
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), Env.get('CREDENTIALS_JSON'));
 export default class TablesController {
@@ -92,7 +92,12 @@ export default class TablesController {
       table.merge(dataTable)
       const tableUpdate = await table.save()
       const user = await User.findByOrFail('tableId', tableUpdate.idTable)
-      this.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable)
+      const newEventId = await this.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable)
+      if (newEventId) {
+        dataTable.eventId = newEventId
+        table.merge(dataTable)
+        await table.save()
+      }
       response.created(tableUpdate.nameTable)
     } catch (error) {
       throw error
@@ -170,9 +175,14 @@ export default class TablesController {
     });
   }
 
-  public updateEvent(dataTable: { [key: string]: string }, email: string, eventId: string, nameTable:string): Promise<any> {
-    return new Promise(async (_resolve, reject) => {
+  public updateEvent(dataTable: { [key: string]: string }, email: string, eventId: string, nameTable: string): Promise<any> {
+    return new Promise(async (resolve, reject) => {
       try {
+        const eventStatus = await this.getEvent(eventId)
+        if (eventStatus.data.status === 'cancelled') {
+          const newEventId = this.createEvent(dataTable)
+          resolve(newEventId)
+        }
         const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
         const auth = await this.authorizeApi();
         const event = {
@@ -193,6 +203,7 @@ export default class TablesController {
           resource: event,
         };
         await calendar.events.update(dataEvent)
+        resolve('')
       } catch (error) {
         reject(error);
       }
@@ -202,6 +213,10 @@ export default class TablesController {
   public async deleteEvent(eventId: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
+        const event = await this.getEvent(eventId)
+        if (event.data.status === 'cancelled') {
+          resolve()
+        }
         const auth = await this.authorizeApi();
         const calendar = await google.calendar({ version: 'v3', auth });
         await calendar.events.delete({
@@ -209,6 +224,22 @@ export default class TablesController {
           eventId,
         })
         resolve()
+      } catch (error) {
+        reject(error)
+      }
+    });
+  }
+
+  public async getEvent(eventId: string): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const auth = await this.authorizeApi();
+        const calendar = await google.calendar({ version: 'v3', auth });
+        const event = await calendar.events.get({
+          calendarId: 'primary',
+          eventId,
+        })
+        resolve(event)
       } catch (error) {
         reject(error)
       }
