@@ -246,7 +246,11 @@ export default class TablesController {
     });
   }
 
-  public async show({ }: HttpContextContract) { }
+  public async show({ response, params }: HttpContextContract) {
+    const { id } = params
+    const table = await Table.findOrFail(id)
+    response.ok(table)
+  }
 
   public async update({ }: HttpContextContract) { }
 
