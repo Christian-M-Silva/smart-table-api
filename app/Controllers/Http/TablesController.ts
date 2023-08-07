@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Table from 'App/Models/Table'
+import { DateTime } from 'luxon';
 import User from 'App/Models/User';
 import { OAuth2Client } from 'google-auth-library';
 import Database from '@ioc:Adonis/Lucid/Database'
@@ -252,7 +253,21 @@ export default class TablesController {
     response.ok(table)
   }
 
-  public async update({ }: HttpContextContract) { }
+  public async update({ request, params }: HttpContextContract) {
+    try {
+      const table = await Table.findOrFail(params.id)
+      if (!table) return null
+      const data = request.all()
+      if (typeof data.nextUpdate === 'string') {
+        data.nextUpdate = DateTime.fromISO(data.nextUpdate)
+      }
+      table.merge(data)
+      await table.save()
+      return table
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
   public async destroy({ params }: HttpContextContract) {
     const { tableId, id, eventId } = params
