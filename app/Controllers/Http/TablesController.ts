@@ -257,12 +257,22 @@ export default class TablesController {
     try {
       const table = await Table.findOrFail(params.id)
       if (!table) return null
+
+      const tableOldUpdateDay = table.nextUpdate
       const data = request.all()
-      if (typeof data.nextUpdate === 'string') {
-        data.nextUpdate = DateTime.fromISO(data.nextUpdate)
-      }
+
       table.merge(data)
-      await table.save()
+      const tableUpdate = await table.save()
+
+      if (table.nextUpdate !== tableOldUpdateDay) {
+        const user = await User.findByOrFail('tableId', tableUpdate.idTable)
+        const newEventId = await this.updateEvent(data, user.email, tableUpdate.eventId, tableUpdate.nameTable)
+        if (newEventId) {
+          data.eventId = newEventId
+          table.merge(data)
+          await table.save()
+        }
+      }
       return table
     } catch (err) {
       throw new Error(err);

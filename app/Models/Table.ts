@@ -28,6 +28,9 @@ export default class Table extends BaseModel {
 
   @column.dateTime({
     serialize: (value: DateTime) => {
+      if (typeof value === 'string') {
+        value = DateTime.fromISO(value)
+      }
       return value.toFormat('dd/MM/yyyy')
     }
   })
