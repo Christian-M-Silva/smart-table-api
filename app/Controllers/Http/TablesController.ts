@@ -1,6 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Table from 'App/Models/Table'
-import { DateTime } from 'luxon';
 import User from 'App/Models/User';
 import { OAuth2Client } from 'google-auth-library';
 import Database from '@ioc:Adonis/Lucid/Database'
@@ -86,6 +85,7 @@ export default class TablesController {
     await Table.create(dataTable)
     response.created()
   }
+
   public async updateDates({ request, response, params }: HttpContextContract) {
     try {
       const dataTable = request.all()
@@ -181,8 +181,8 @@ export default class TablesController {
       try {
         const eventStatus = await this.getEvent(eventId)
         if (eventStatus.data.status === 'cancelled') {
-          const newEventId = this.createEvent(dataTable)
-          resolve(newEventId)
+          const newEventId = await this.createEvent(dataTable)
+          return resolve(newEventId)
         }
         const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
         const auth = await this.authorizeApi();
