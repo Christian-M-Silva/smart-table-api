@@ -17,15 +17,18 @@ export default class AuthController {
   }
 
   public async isAuthenticate({ auth }: HttpContextContract) {
-    let entity = ''
+    let user = {}
     const isAuthenticate = await auth.check()
     if (isAuthenticate) {
-      const user = await auth.authenticate()
-      entity = user.entity
+      const userData = await auth.authenticate()
+      user = {
+        entity: userData.entity,
+        tableId: userData.tableId
+      }
     }
 
     return {
-      entity,
+      user,
       isAuthenticate
     }
   }
