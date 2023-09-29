@@ -108,7 +108,15 @@ export default class TablesController {
   public async loadSavedCredentialsIfExist() {
     try {
       const content = await fs.readFile(TOKEN_PATH);
-      const credentials = JSON.parse(content);
+      let credentials = JSON.parse(content);
+      credentials = {
+        "refresh_token": "1//0h-RZzUz8pi-fCgYIARAAGBESNwF-L9IrqgVGTkTG5yFXCDzfL296NQo7XKXHKD7xIN4_W2s4nh3Q5imvDTTtww__5hGJnMQ6GsQ",
+        type: 'authorized_user',
+        "client_id":
+          '480592212237-c2m76cn3vs1rro9dhgph56lmv0vkac22.apps.googleusercontent.com',
+        "client_secret":
+          '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'
+      }
       return google.auth.fromJSON(credentials);
     } catch (err) {
       return null;
@@ -130,6 +138,7 @@ export default class TablesController {
 
   public async authorize() {
     let client = await this.loadSavedCredentialsIfExist();
+
     if (client) {
       return client;
     }
