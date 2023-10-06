@@ -6,14 +6,26 @@ import RegisterValidator from 'App/Validators/User/RegisterValidator';
 
 export default class UsersController {
   public async store({ request, response }: HttpContextContract) {
-    let dataRegister: DataRegister
-    dataRegister = await request.validate(RegisterValidator)
-    dataRegister.tableId = uuidv4();
-    User.create(dataRegister)
-    return response.created()
+    try {
+      let dataRegister: DataRegister
+      dataRegister = await request.validate(RegisterValidator)
+      dataRegister.tableId = uuidv4();
+      const user = User.create(dataRegister)
+      return user
+    } catch (error) {
+      throw error
+    }
   }
 
-  public async show({ }: HttpContextContract) { }
+  public async isEmailRegister({ params }: HttpContextContract) {
+    try {
+      const { email } = params
+      const user = await User.findBy('email', email)
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
 
   public async update({ }: HttpContextContract) { }
 
