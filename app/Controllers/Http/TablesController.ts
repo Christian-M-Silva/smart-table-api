@@ -1,21 +1,17 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Table from 'App/Models/Table'
 import User from 'App/Models/User';
-import { OAuth2Client } from 'google-auth-library';
 import Database from '@ioc:Adonis/Lucid/Database'
 import { camelCase } from 'lodash'
 import { TypeGetTable } from 'interfaces/interfaces'
-import { parseISO, format } from 'date-fns';
-import Env from '@ioc:Adonis/Core/Env'
-const fs = require('fs').promises;
-const path = require('path');
-const process = require('process');
-const { authenticate } = require('@google-cloud/local-auth');
-const { google } = require('googleapis');
-const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.events.readonly', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'];
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), Env.get('CREDENTIALS_JSON'));
+import { format } from 'date-fns';
+import GoogleCalendarApi from 'app/ExternalService/GoogleApi/GoogleCalendarApi';
 export default class TablesController {
+  private googleCalendarApi: GoogleCalendarApi;
+
+  constructor() {
+    this.googleCalendarApi = new GoogleCalendarApi();
+  }
   public async index({ params, request, response }: HttpContextContract) {
     try {
       const { tableId } = params
@@ -69,18 +65,10 @@ export default class TablesController {
     }
   }
 
-  public async authorizeApi() {
-    try {
-      const result = await this.authorize();
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   public async store({ request, response }: HttpContextContract) {
     const dataTable = request.all()
-    const eventId = await this.createEvent(dataTable)
+    const token = request.header
+    const eventId = await this.googleCalendarApi.createEvent(dataTable, token)
     dataTable.eventId = eventId
     await Table.create(dataTable)
     response.created()
@@ -89,11 +77,12 @@ export default class TablesController {
   public async updateDates({ request, response, params }: HttpContextContract) {
     try {
       const dataTable = request.all()
+      const token = request.header
       const table = await Table.findOrFail(params.id)
       table.merge(dataTable)
       const tableUpdate = await table.save()
       const user = await User.findByOrFail('tableId', tableUpdate.idTable)
-      const newEventId = await this.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable)
+      const newEventId = await this.googleCalendarApi.updateEvent(dataTable, user.email, tableUpdate.eventId, tableUpdate.nameTable, token)
       if (newEventId) {
         dataTable.eventId = newEventId
         table.merge(dataTable)
@@ -103,157 +92,6 @@ export default class TablesController {
     } catch (error) {
       throw error
     }
-  }
-
-  public async loadSavedCredentialsIfExist() {
-    try {
-      const content = await fs.readFile(TOKEN_PATH);
-      let credentials = JSON.parse(content);
-      credentials = {
-        "refresh_token": "1//0h-RZzUz8pi-fCgYIARAAGBESNwF-L9IrqgVGTkTG5yFXCDzfL296NQo7XKXHKD7xIN4_W2s4nh3Q5imvDTTtww__5hGJnMQ6GsQ",
-        type: 'authorized_user',
-        "client_id":
-          '480592212237-c2m76cn3vs1rro9dhgph56lmv0vkac22.apps.googleusercontent.com',
-        "client_secret":
-          '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'
-      }
-      return google.auth.fromJSON(credentials);
-    } catch (err) {
-      return null;
-    }
-  }
-
-  public async saveCredentials(client: OAuth2Client) {
-    const content = await fs.readFile(CREDENTIALS_PATH);
-    const keys = JSON.parse(content);
-    const key = keys.installed || keys.web;
-    const payload = JSON.stringify({
-      type: 'authorized_user',
-      client_id: key.client_id,
-      client_secret: key.client_secret,
-      refresh_token: client.credentials.refresh_token,
-    });
-    await fs.writeFile(TOKEN_PATH, payload);
-  }
-
-  public async authorize() {
-    let client = await this.loadSavedCredentialsIfExist();
-
-    if (client) {
-      return client;
-    }
-    client = await authenticate({
-      scopes: SCOPES,
-      keyfilePath: CREDENTIALS_PATH,
-    });
-    if (client.credentials) {
-      await this.saveCredentials(client);
-    }
-    return client;
-  }
-
-  public createEvent(dataTable: { [key: string]: string }): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
-        const auth = await this.authorizeApi();
-        const event = {
-          summary: `Atualizar a tabela ${dataTable.nameTable}`,
-          description: `Abra o sistema e ele atualizará sua(s) tabela(s) automaticamente`,
-          start: {
-            date,
-          },
-          end: {
-            date,
-          },
-        };
-        const calendar = await google.calendar({ version: 'v3', auth });
-        const dataEvent = {
-          auth,
-          calendarId: 'primary',
-          resource: event,
-        };
-        await calendar.events.insert(dataEvent, (err: any, event: any) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(event.data.id);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  public updateEvent(dataTable: { [key: string]: string }, email: string, eventId: string, nameTable: string): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const eventStatus = await this.getEvent(eventId)
-        if (eventStatus.data.status === 'cancelled') {
-          const newEventId = await this.createEvent(dataTable)
-          return resolve(newEventId)
-        }
-        const date = format(parseISO(dataTable.nextUpdate), 'yyyy-MM-dd');
-        const auth = await this.authorizeApi();
-        const event = {
-          summary: `Atualizar a tabela ${nameTable}`,
-          description: `Abra o sistema e ele atualizará sua(s) tabela(s) automaticamente`,
-          start: {
-            date,
-          },
-          end: {
-            date,
-          },
-        };
-        const calendar = await google.calendar({ version: 'v3', auth });
-        const dataEvent = {
-          auth,
-          calendarId: email,
-          eventId,
-          resource: event,
-        };
-        await calendar.events.update(dataEvent)
-        resolve('')
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  public async deleteEvent(eventId: string): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const event = await this.getEvent(eventId)
-        if (event.data.status === 'cancelled') {
-          resolve()
-        }
-        const auth = await this.authorizeApi();
-        const calendar = await google.calendar({ version: 'v3', auth });
-        await calendar.events.delete({
-          calendarId: 'primary',
-          eventId,
-        })
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
-    });
-  }
-
-  public async getEvent(eventId: string): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const auth = await this.authorizeApi();
-        const calendar = await google.calendar({ version: 'v3', auth });
-        const event = await calendar.events.get({
-          calendarId: 'primary',
-          eventId,
-        })
-        resolve(event)
-      } catch (error) {
-        reject(error)
-      }
-    });
   }
 
   public async show({ response, params }: HttpContextContract) {
@@ -266,7 +104,7 @@ export default class TablesController {
     try {
       const table = await Table.findOrFail(params.id)
       if (!table) return null
-
+      const token = request.header
       const tableOldUpdateDay = table.nextUpdate
       const data = request.all()
 
@@ -275,7 +113,7 @@ export default class TablesController {
 
       if (table.nextUpdate !== tableOldUpdateDay) {
         const user = await User.findByOrFail('tableId', tableUpdate.idTable)
-        const newEventId = await this.updateEvent(data, user.email, tableUpdate.eventId, tableUpdate.nameTable)
+        const newEventId = await this.googleCalendarApi.updateEvent(data, user.email, tableUpdate.eventId, tableUpdate.nameTable, token)
         if (newEventId) {
           data.eventId = newEventId
           table.merge(data)
@@ -288,9 +126,10 @@ export default class TablesController {
     }
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ request, params }: HttpContextContract) {
     const { tableId, id, eventId } = params
-    await this.deleteEvent(eventId)
+    const token = request.header
+    await this.googleCalendarApi.deleteEvent(eventId, token)
     const table = await Table.query().where('idTable', tableId).where('id', id).first()
     table?.delete()
   }
