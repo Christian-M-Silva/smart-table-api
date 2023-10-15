@@ -5,7 +5,7 @@ import { DataRegister } from 'interfaces/interfaces';
 import RegisterValidator from 'App/Validators/User/RegisterValidator';
 
 export default class UsersController {
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request }: HttpContextContract) {
     try {
       let dataRegister: DataRegister
       dataRegister = await request.validate(RegisterValidator)

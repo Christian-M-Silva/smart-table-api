@@ -5,7 +5,7 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import { camelCase } from 'lodash'
 import { TypeGetTable } from 'interfaces/interfaces'
 import { format } from 'date-fns';
-import GoogleCalendarApi from 'app/ExternalService/GoogleApi/GoogleCalendarApi';
+import GoogleCalendarApi from 'App/ExternalService/GoogleApi/GoogleCalendarApi';
 export default class TablesController {
   private googleCalendarApi: GoogleCalendarApi;
 
