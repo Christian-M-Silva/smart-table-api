@@ -1,13 +1,16 @@
 import { parseISO, format } from 'date-fns';
 const { google } = require('googleapis');
 import Env from '@ioc:Adonis/Core/Env'
+import CryptoJS from 'crypto-js';
 export default class GoogleCalendarApi {
     public async authorizeApi(token: string) {
         try {
             if (!token) {
                 throw new Error('401')
             }
-            let credentials = JSON.parse(token);
+            const bytes = CryptoJS.AES.decrypt(token, Env.get('SECRET_KEY'));
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            let credentials = decryptedData.credentials
             credentials.client_id = Env.get('CLIENT_ID')
             credentials.client_secret = Env.get('CLIENT_SECRET')
             // credentials = {

@@ -66,8 +66,11 @@ export default class TablesController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    const token = request.header('Authorization')
+    if (!token) {
+      return response.status(401)
+    }
     const dataTable = request.all()
-    const token = request.header
     const eventId = await this.googleCalendarApi.createEvent(dataTable, token)
     dataTable.eventId = eventId
     await Table.create(dataTable)
@@ -76,8 +79,11 @@ export default class TablesController {
 
   public async updateDates({ request, response, params }: HttpContextContract) {
     try {
+      const token = request.header('Authorization')
+      if (!token) {
+        return response.status(401)
+      }
       const dataTable = request.all()
-      const token = request.header
       const table = await Table.findOrFail(params.id)
       table.merge(dataTable)
       const tableUpdate = await table.save()
@@ -100,11 +106,14 @@ export default class TablesController {
     response.ok(table)
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params, response }: HttpContextContract) {
     try {
+      const token = request.header('Authorization')
+      if (!token) {
+        return response.status(401)
+      }
       const table = await Table.findOrFail(params.id)
       if (!table) return null
-      const token = request.header
       const tableOldUpdateDay = table.nextUpdate
       const data = request.all()
 
@@ -126,9 +135,12 @@ export default class TablesController {
     }
   }
 
-  public async destroy({ request, params }: HttpContextContract) {
+  public async destroy({ request, params, response }: HttpContextContract) {
+    const token = request.header('Authorization')
+    if (!token) {
+      return response.status(401)
+    }
     const { tableId, id, eventId } = params
-    const token = request.header
     await this.googleCalendarApi.deleteEvent(eventId, token)
     const table = await Table.query().where('idTable', tableId).where('id', id).first()
     table?.delete()

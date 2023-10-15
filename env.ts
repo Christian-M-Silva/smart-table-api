@@ -35,4 +35,5 @@ export default Env.rules({
 	NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
 	CLIENT_SECRET: Env.schema.string(),
 	CLIENT_ID: Env.schema.string(),
+	SECRET_KEY: Env.schema.string(),
 })
