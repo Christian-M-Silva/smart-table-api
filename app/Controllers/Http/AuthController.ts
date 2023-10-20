@@ -1,18 +1,18 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 
-export default class AuthController {
-  public async store({ request, auth }: HttpContextContract) {
-    const { password, entity } = request.all()
-    const dataToken = await auth.use('api').attempt(entity, password, {
-      expiresIn: '30 days',
-    })
+// export default class AuthController {
+//   public async store({ request, auth }: HttpContextContract) {
+//     const { password, entity } = request.all()
+//     const dataToken = await auth.use('api').attempt(entity, password, {
+//       expiresIn: '30 days',
+//     })
 
-    const tableId = dataToken.user.tableId
-    return { dataToken, tableId }
-  }
+//     const tableId = dataToken.user.tableId
+//     return { dataToken, tableId }
+//   }
 
-  public async destroy({ auth }: HttpContextContract) {
-    await auth.use('api').logout()
-  }
-}
+//   public async destroy({ auth }: HttpContextContract) {
+//     await auth.use('api').logout()
+//   }
+// }

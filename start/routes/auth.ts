@@ -1,7 +1,7 @@
-import Route from '@ioc:Adonis/Core/Route'
+// import Route from '@ioc:Adonis/Core/Route'
 
-Route.group(() =>{
-    Route.post('/', 'AuthController.store')
-    Route.delete('/', 'AuthController.destroy')
-    Route.get('/isAuthenticate', 'AuthController.isAuthenticate')
-}).prefix('auth')
+// Route.group(() =>{
+//     Route.post('/', 'AuthController.store')
+//     Route.delete('/', 'AuthController.destroy')
+//     Route.get('/isAuthenticate', 'AuthController.isAuthenticate')
+// }).prefix('auth')
