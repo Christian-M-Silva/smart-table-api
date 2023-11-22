@@ -7,3 +7,4 @@ coverage
 tmp
 credentials.json
 token.json
+docker-compose.yml
