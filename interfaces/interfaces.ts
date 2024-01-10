@@ -2,6 +2,7 @@ export interface DataRegister {
     entity: string,
     email: string,
     tableId?: string,
+    quantityLastRow?: number
 }
 
 export interface ColumnsTableCreate {
@@ -33,4 +34,8 @@ export interface TypeGetTable {
     next_update: string,
     rows: rowsTableCreateOrRead[],
     updated_at: string,
+}
+export interface lastRows {
+    cols: ColumnsTableCreate[],
+    rows: rowsTableCreateOrRead[]
 }

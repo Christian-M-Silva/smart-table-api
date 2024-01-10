@@ -8,6 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('entity', 255).notNullable().unique()
       table.string('table_id', 255).notNullable().unique()
+      table.integer('quantity_last_row').notNullable()
       table.string('email', 255).notNullable().unique()
       table.string('remember_me_token').nullable()
 

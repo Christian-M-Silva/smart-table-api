@@ -9,6 +9,7 @@ export default class extends BaseSchema {
       table.string('name_table').notNullable()
       table.string('event_id').notNullable()
       table.json('rows').notNullable()
+      table.json('last_rows').nullable()
       table.json('cols').notNullable()
       table.json('days_week').notNullable()
       table.dateTime('next_update', { precision: 6 }).notNullable()

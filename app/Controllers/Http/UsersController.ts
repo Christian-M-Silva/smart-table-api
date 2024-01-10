@@ -9,6 +9,7 @@ export default class UsersController {
     try {
       let dataRegister: DataRegister
       dataRegister = await request.validate(RegisterValidator)
+      dataRegister.quantityLastRow = 2
       dataRegister.tableId = uuidv4();
       const user = User.create(dataRegister)
       return user
