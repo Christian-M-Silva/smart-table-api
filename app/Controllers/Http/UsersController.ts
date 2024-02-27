@@ -28,7 +28,24 @@ export default class UsersController {
     }
   }
 
-  public async update({ }: HttpContextContract) { }
+  public async update({ request, params }: HttpContextContract) {
+    try {
+      const userUpdate = request.all()
+      const { email } = params;
+      const user = await User.findByOrFail("email", email);
+      await user.merge(userUpdate).save()
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
 
-  public async destroy({ }: HttpContextContract) { }
+  public async destroy({ params }: HttpContextContract) {
+    try {
+      const user = await User.findByOrFail("email", params.email);
+      await user.delete()
+    } catch (error) {
+      throw error
+    }
+  }
 }
