@@ -24,7 +24,7 @@ export default class RegisterValidator {
    *    ```
    */
   public schema = schema.create({
-    entity: schema.string({trim: true},  [rules.unique({ table: 'users', column: 'entity' })]),
+    entity: schema.string({trim: true}),
     email: schema.string({trim: true},  [rules.unique({ table: 'users', column: 'email' }), rules.email()]),
   })
 
@@ -40,7 +40,6 @@ export default class RegisterValidator {
    *
    */
   public messages: CustomMessages = {
-    'entity.unique': 'A entidade que você está tentando cadastrar já está em uso, tente outra',
     'email.unique': 'O email que você está tentando cadastrar já está em uso, tente outro'
   }
 }
