@@ -27,6 +27,31 @@ export default class UsersController {
     }
   }
 
+  /**
+		* @swagger
+		* /user/isEmailRegister/:email:
+		* get:
+		*     tags:
+		*       - Users
+		*     requestBody:
+		*       required: false
+		*       content:
+		*         application/json:
+		*           description: Descobrir se o e-mail a ser cadastrado já não existe
+		*           schema:
+		*             type: object
+		*             properties:
+		*     produces:
+		*       - application/json
+		*     responses:
+		*       200:
+		*         description: Success
+		*         content:
+		*           application/json:
+		*             schema:
+		*               $ref: '#/components/schemas/User'
+		*/
+
   public async isEmailRegister({ params }: HttpContextContract) {
     try {
       const { email } = params
