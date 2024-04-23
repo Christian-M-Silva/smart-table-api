@@ -2,7 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { v4 as uuidv4 } from 'uuid';
 import User from 'App/Models/User';
 import Database from '@ioc:Adonis/Lucid/Database';
-import { DataRegister } from 'interfaces/interfaces';
+import { DataRegister } from 'App/interfaces/interfaces';
 import RegisterValidator from 'App/Validators/User/RegisterValidator';
 import GoogleCalendarApi from 'App/ExternalService/GoogleApi/GoogleCalendarApi';
 

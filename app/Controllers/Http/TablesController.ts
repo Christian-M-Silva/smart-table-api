@@ -3,7 +3,7 @@ import Table from 'App/Models/Table'
 import User from 'App/Models/User';
 import Database from '@ioc:Adonis/Lucid/Database'
 import { camelCase } from 'lodash'
-import { TypeGetTable } from 'interfaces/interfaces'
+import { TypeGetTable } from 'App/interfaces/interfaces';
 import { format } from 'date-fns';
 import GoogleCalendarApi from 'App/ExternalService/GoogleApi/GoogleCalendarApi';
 export default class TablesController {
@@ -12,6 +12,17 @@ export default class TablesController {
   constructor() {
     this.googleCalendarApi = new GoogleCalendarApi();
   }
+
+    /**
+   * @index
+   * @operationId getTables
+   * @description Utilizando o tableId, a paginação e o search ele irá retornar os dados da tabela correspondente
+   * @summary Retornará dados de tabelas registados de forma paginada de acordo com o tableId
+   * @responseBody 200 - {"data": "<Table[]>", "meta": "{page: string, perPage: string, total: int }"} - Tabelas retornadas
+   * @paramQuery page - Página da tabela - @required
+   * @paramQuery perPage - Quantidade por pagina - @required
+   * @paramQuery search - Algum  termo para pesquisar - @example("")
+   */
   public async index({ params, request, response }: HttpContextContract) {
     try {
       const { tableId } = params

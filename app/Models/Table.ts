@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 import CamelCaseNamingStrategy from './CamelCaseNamingStrategy'
-import { lastRows } from '../../interfaces/interfaces'
+import { lastRows } from 'App/interfaces/interfaces'
 
 export default class Table extends BaseModel {
   public static namingStrategy = new CamelCaseNamingStrategy()
