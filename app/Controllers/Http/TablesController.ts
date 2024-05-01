@@ -13,16 +13,16 @@ export default class TablesController {
     this.googleCalendarApi = new GoogleCalendarApi();
   }
 
-    /**
-   * @index
-   * @operationId getTables
-   * @description Utilizando o tableId, a paginação e o search ele irá retornar os dados da tabela correspondente
-   * @summary Retornará dados de tabelas registados de forma paginada de acordo com o tableId
-   * @responseBody 200 - {"data": "<Table[]>", "meta": "{page: string, perPage: string, total: int }"} - Tabelas retornadas
-   * @paramQuery page - Página da tabela - @required
-   * @paramQuery perPage - Quantidade por pagina - @required
-   * @paramQuery search - Algum  termo para pesquisar - @example("")
-   */
+  /**
+ * @index
+ * @operationId getTables
+ * @description Utilizando o tableId, a paginação e o search ele irá retornar os dados da tabela correspondente
+ * @summary Retornará dados de tabelas registados de forma paginada de acordo com o tableId
+ * @responseBody 200 - {"data": "<Table[]>", "meta": "{page: string, perPage: string, total: int }"} - Tabelas retornadas
+ * @paramQuery page - Página da tabela - @required
+ * @paramQuery perPage - Quantidade por pagina - @required
+ * @paramQuery search - Algum  termo para pesquisar - @example("")
+ */
   public async index({ params, request, response }: HttpContextContract) {
     try {
       const { tableId } = params
@@ -88,6 +88,16 @@ export default class TablesController {
     response.created()
   }
 
+  /**
+* @updateDates
+* @operationId updateDates
+* @description Utilizando o id ele atualiza a data de atualização da tabela correspondente
+* @summary Atualizará as datas de atualização das tabelas
+* @responseBody 201 - 'nomeDaTabela' - Atualizará a data de atualização da tabela
+* @responseBody 401 - Não têm o token de auth
+* @paramHeader Authorization
+* @requestBody { "rows": "string", "nextUpdate": "DateTime", "lastRows": "string"}
+*/
   public async updateDates({ request, response, params }: HttpContextContract) {
     try {
       const token = request.header('Authorization')
@@ -155,12 +165,6 @@ export default class TablesController {
     await this.googleCalendarApi.deleteEvent(eventId, token)
     const table = await Table.query().where('idTable', tableId).where('id', id).first()
     table?.delete()
-  }
-
-  public async download({ params }: HttpContextContract) {
-    const { tableId, id } = params
-    const table = await Table.query().where('idTable', tableId).where('id', id).first()
-    return table
   }
 
   public async existTableWithThisName({ request }: HttpContextContract) {
