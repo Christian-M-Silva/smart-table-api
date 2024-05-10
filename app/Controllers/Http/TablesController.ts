@@ -96,7 +96,7 @@ export default class TablesController {
 * @responseBody 201 - 'nomeDaTabela' - Atualizará a data de atualização da tabela
 * @responseBody 401 - Não têm o token de auth
 * @security BearerAuth
-* @requestBody { "rows": "string", "nextUpdate": "DateTime", "lastRows": "string"}
+* @requestBody { "rows": "[{\"1\":\"\",\"date\":\"26/05/2024\"},{\"1\":\"\",\"date\":\"27/05/2024\"}]", "nextUpdate": "2024-05-27T00:00:00.000-03:00", "lastRows": "{\"cols\":[{\"name\":\"date\",\"align\":\"left\",\"field\":\"date\",\"label\":\"DATA\"},{\"name\":\"1\",\"align\":\"left\",\"field\":\"1\",\"label\":\"1\"}],\"rows\":[{\"1\":\"\",\"date\":\"24/05/2024\"},{\"1\":\"\",\"date\":\"25/05/2024\"}]}"}
 */
   public async updateDates({ request, response, params }: HttpContextContract) {
     try {
