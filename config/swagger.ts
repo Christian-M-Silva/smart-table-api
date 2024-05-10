@@ -12,9 +12,15 @@ export default {
 	  parameters: {}, // OpenAPI conform parameters that are commonly used
 	  headers: {}, // OpenAPI conform headers that are commonly used
 	},
-	securitySchemes: {}, // optional
-	authMiddlewares: ["auth", "auth:api"], // optional
-	defaultSecurityScheme: "BearerAuth", // optional
-	persistAuthorization: true, // persist authorization between reloads on the swagger page
+	authMiddlewares: ["auth"], // optional
+	securitySchemes: {
+		ApiKeyAuth: {
+		  type: "apiKey",
+		  in: "header",
+		  name: "Authorization",
+		}
+	  },
+	defaultSecurityScheme: "ApiKeyAuth", // optional
+	persistAuthorization: true,
 	showFullPath: false, // the path displayed after endpoint summary
-  };
+};

@@ -18,7 +18,7 @@ export default class TablesController {
  * @operationId getTables
  * @description Utilizando o tableId, a paginação e o search ele irá retornar os dados da tabela correspondente
  * @summary Retornará dados de tabelas registados de forma paginada de acordo com o tableId
- * @responseBody 200 - {"data": "<Table[]>", "meta": "{page: string, perPage: string, total: int }"} - Tabelas retornadas
+ * @responseBody 200 - {"data": "<Table[]>", "meta": "{page: string, perPage: string, total: int }"}
  * @paramQuery page - Página da tabela - @required
  * @paramQuery perPage - Quantidade por pagina - @required
  * @paramQuery search - Algum  termo para pesquisar - @example("")
@@ -91,11 +91,11 @@ export default class TablesController {
   /**
 * @updateDates
 * @operationId updateDates
-* @description Utilizando o id ele atualiza a data de atualização da tabela correspondente
+* @description Utilizando o id da tabela ele atualiza a data de atualização da tabela correspondente
 * @summary Atualizará as datas de atualização das tabelas
 * @responseBody 201 - 'nomeDaTabela' - Atualizará a data de atualização da tabela
 * @responseBody 401 - Não têm o token de auth
-* @paramHeader Authorization
+* @security BearerAuth
 * @requestBody { "rows": "string", "nextUpdate": "DateTime", "lastRows": "string"}
 */
   public async updateDates({ request, response, params }: HttpContextContract) {
