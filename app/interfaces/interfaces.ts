@@ -9,7 +9,7 @@ export interface ColumnsTableCreate {
     name: string,
     label: string,
     field: string,
-    align: 'left',
+    align: string,
 }
 
 export interface vModelSelect {

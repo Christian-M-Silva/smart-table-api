@@ -121,11 +121,29 @@ export default class TablesController {
     }
   }
 
+  /**
+* @show
+* @operationId getTable
+* @description Utilizando o tableId retornar os dados da tabela correspondente
+* @summary Retornará uma tabela de acordo com o tableId
+* @responseBody 200 - {"data": "<Table>"}
+*/
   public async show({ response, params }: HttpContextContract) {
     const { id } = params
     const table = await Table.findOrFail(id)
     response.ok(table)
   }
+
+  /**
+* @update
+* @operationId update
+* @description Utilizando o id da tabela ele atualiza a tabela correspondente
+* @summary Atualizará a tabela
+* @responseBody 200 - {"data": "<Table>"}
+* @responseBody 401 - Não têm o token de auth
+* @security BearerAuth
+* @requestBody { "rows": "[{\"1\":\"\",\"date\":\"26/05/2024\"},{\"1\":\"\",\"date\":\"27/05/2024\"}]", "cols": "[{\"name\":\"date\",\"align\":\"left\",\"field\":\"date\",\"label\":\"DATA\"},{\"name\":\"1\",\"align\":\"left\",\"field\":\"1\",\"label\":\"1\"}]", "nameTable": "1", "idTable": "cb64de46-ecbc-4aa7-a0c5-d8cdf8ed4010", "daysWeek": "[{\"label\":\"Domingo\",\"value\":\"0\"},{\"label\":\"Segunda\",\"value\":\"1\"},{\"label\":\"Terça\",\"value\":\"2\"},{\"label\":\"Quarta\",\"value\":\"3\"},{\"label\":\"Quinta\",\"value\":\"4\"},{\"label\":\"Sexta\",\"value\":\"5\"},{\"label\":\"Sábado\",\"value\":\"6\"}]", "nextUpdate": "2024-05-27T00:00:00.000-03:00"}
+*/
 
   public async update({ request, params, response }: HttpContextContract) {
     try {
