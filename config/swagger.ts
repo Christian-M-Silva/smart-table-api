@@ -6,7 +6,7 @@ export default {
 	tagIndex: 2,
 	snakeCase: true,
 	debug: false, // set to true, to get some useful debug output
-	ignore: ["/swagger", "/docs", "uploads"],
+	ignore: ["/swagger", "/docs", "uploads", "isEmailRegister", "user"],
 	preferredPutPatch: "PUT", // if PUT/PATCH are provided for the same route, prefer PUT
 	common: {
 	  parameters: {}, // OpenAPI conform parameters that are commonly used

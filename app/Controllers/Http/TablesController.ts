@@ -76,6 +76,15 @@ export default class TablesController {
     }
   }
 
+    /**
+* @store
+* @operationId store
+* @summary Cadastrará uma tabela
+* @responseBody 201 - Tabela criada
+* @responseBody 401 - Não têm o token de auth
+* @security BearerAuth
+* @requestBody { "rows": "[{\"1\":\"\",\"date\":\"26/05/2024\"},{\"1\":\"\",\"date\":\"27/05/2024\"}]", "cols": "[{\"name\":\"date\",\"align\":\"left\",\"field\":\"date\",\"label\":\"DATA\"},{\"name\":\"1\",\"align\":\"left\",\"field\":\"1\",\"label\":\"1\"}]", "nameTable": "1", "idTable": "cb64de46-ecbc-4aa7-a0c5-d8cdf8ed4010", "daysWeek": "[{\"label\":\"Domingo\",\"value\":\"0\"},{\"label\":\"Segunda\",\"value\":\"1\"},{\"label\":\"Terça\",\"value\":\"2\"},{\"label\":\"Quarta\",\"value\":\"3\"},{\"label\":\"Quinta\",\"value\":\"4\"},{\"label\":\"Sexta\",\"value\":\"5\"},{\"label\":\"Sábado\",\"value\":\"6\"}]", "nextUpdate": "2024-05-27T00:00:00.000-03:00"}
+*/
   public async store({ request, response }: HttpContextContract) {
     const token = request.header('Authorization')
     if (!token) {
@@ -144,7 +153,6 @@ export default class TablesController {
 * @security BearerAuth
 * @requestBody { "rows": "[{\"1\":\"\",\"date\":\"26/05/2024\"},{\"1\":\"\",\"date\":\"27/05/2024\"}]", "cols": "[{\"name\":\"date\",\"align\":\"left\",\"field\":\"date\",\"label\":\"DATA\"},{\"name\":\"1\",\"align\":\"left\",\"field\":\"1\",\"label\":\"1\"}]", "nameTable": "1", "idTable": "cb64de46-ecbc-4aa7-a0c5-d8cdf8ed4010", "daysWeek": "[{\"label\":\"Domingo\",\"value\":\"0\"},{\"label\":\"Segunda\",\"value\":\"1\"},{\"label\":\"Terça\",\"value\":\"2\"},{\"label\":\"Quarta\",\"value\":\"3\"},{\"label\":\"Quinta\",\"value\":\"4\"},{\"label\":\"Sexta\",\"value\":\"5\"},{\"label\":\"Sábado\",\"value\":\"6\"}]", "nextUpdate": "2024-05-27T00:00:00.000-03:00"}
 */
-
   public async update({ request, params, response }: HttpContextContract) {
     try {
       const token = request.header('Authorization')
@@ -174,6 +182,15 @@ export default class TablesController {
     }
   }
 
+  /**
+* @destroy
+* @operationId destroy
+* @description Utilizando o id, eventId e o tableId da tabela ele excluirá a tabela correspondente
+* @summary Excluirá a tabela
+* @responseBody 200 - Excluido com sucesso
+* @responseBody 401 - Não têm o token de auth
+* @security BearerAuth
+*/
   public async destroy({ request, params, response }: HttpContextContract) {
     const token = request.header('Authorization')
     if (!token) {
@@ -185,6 +202,14 @@ export default class TablesController {
     table?.delete()
   }
 
+    /**
+* @existTableWithThisName
+* @operationId existTableWithThisName
+* @description Utilizando o nome da tabela e o tableId ele verifica se essa tabela já existe
+* @summary Verifica se tabela já existe
+* @responseBody 200 - bool
+* @requestBody {"tableName": "Nome da tabela", "tableId": "Id da tabela" }
+*/
   public async existTableWithThisName({ request }: HttpContextContract) {
     const { tableName, tableId } = request.all()
 
